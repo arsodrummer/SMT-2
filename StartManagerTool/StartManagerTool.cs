@@ -214,7 +214,7 @@ namespace StartManagerTool
             {
                 ListViewItem row = new ListViewItem(u.UserName);
                 row.Tag = u;
-                listView.Items.Add(row);                
+                listView.Items.Add(row); // should to be in thread
             }                
 
             if(listView.Items.Count > 0)
