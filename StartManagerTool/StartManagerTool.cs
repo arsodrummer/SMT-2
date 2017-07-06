@@ -21,6 +21,8 @@ namespace StartManagerTool
         public Task selectedTask;
         private bool thisISDefaultTasks;
 
+        delegate void SetListViewCallback(User u);
+
         public StartManagerTool()
         {
             InitializeComponent();
@@ -38,9 +40,10 @@ namespace StartManagerTool
             }
             else
             {
-
                 ParseFiles();
-                PopulateData();                
+                //PopulateData();
+                Thread t = new Thread(PopulateData);
+                t.Start();
             }
         }
 
@@ -209,21 +212,39 @@ namespace StartManagerTool
         public void PopulateData()
         {
             ClearDataInUI();
-
+            
             foreach (User u in users)
             {
-                ListViewItem row = new ListViewItem(u.UserName);
+                /*ListViewItem row = new ListViewItem(u.UserName);
                 row.Tag = u;
-                listView.Items.Add(row); // should to be in thread
+                listView.Items.Add(row); // should to be in thread*/
+                populateDataSafe(u);
+                Thread.Sleep(2);
             }                
 
-            if(listView.Items.Count > 0)
+            /*if(listView.Items.Count > 0)
             {
                 ListViewItem selectedRow = listView.Items[0];
                 selectedRow.Selected = true;
                 showTasks(selectedRow);
+            }*/
+
+        }
+
+        private void populateDataSafe(User u)
+        {
+            
+            if (listView.InvokeRequired)
+            {
+                SetListViewCallback d = new SetListViewCallback(populateDataSafe);
+                listView.Invoke(d, new object[] { u});
             }
-                
+            else
+            {
+                ListViewItem row = new ListViewItem(u.UserName);
+                row.Tag = u;
+                listView.Items.Add(row);                
+            }
         }
         
         #endregion
